@@ -1,2 +1,6 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿using CliWrap;
+using CliWrap.Buffered;
+
+var dotnet = await Cli.Wrap("dotnet").WithArguments("--version").ExecuteBufferedAsync();
+
+Console.WriteLine(dotnet.StandardOutput);
