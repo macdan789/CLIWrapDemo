@@ -5,7 +5,7 @@ public interface IGitClient
     Task<string> GetVersion();
     Task<string> Init();
     Task<string> Add();
-    Task<string> Add(params string[] files);
+    Task<string> Add(string file);
     Task<string> Commit(string message);
     Task<string> Pull();
     Task<string> Push();

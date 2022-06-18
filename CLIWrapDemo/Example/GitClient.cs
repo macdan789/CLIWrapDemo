@@ -1,5 +1,6 @@
 ﻿using CliWrap;
 using CliWrap.Buffered;
+using System.Text;
 
 namespace CLIWrapDemo.Example;
 
@@ -16,12 +17,12 @@ public class GitClient : IGitClient
     private const string GIT_PUSH_COMMAND = "push";
     private const string GIT_CLONE_COMMAND = "clone";
     private const string GIT_BRANCH_COMMAND = "branch";
+    private const string CURRENT = "--show-current";
     private const string GIT_CHECKOUT_COMMAND = "checkout";
     private const string GIT_VERSION_COMMAND = "--version";
     private readonly string workingPath;
 
     #endregion
-
 
     public GitClient(string path)
     {
@@ -46,30 +47,54 @@ public class GitClient : IGitClient
             return string.Empty;
         }
     }
-    
+
+    private async Task<string> CommonMethodNotBuffered(params string[] args)
+    {
+        try
+        {
+            var outputBuffer = new StringBuilder();
+
+            var result = await Cli.Wrap(GIT_COMMAND)
+                .WithArguments(args)
+                .WithWorkingDirectory(workingPath)
+                .WithValidation(CommandResultValidation.ZeroExitCode)
+                .WithStandardOutputPipe(PipeTarget.ToStringBuilder(outputBuffer))
+                .ExecuteAsync();
+
+            return outputBuffer.ToString();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return string.Empty;
+        }
+    }
+
+    #region MAIN_COMMANDS
+
     public async Task<string> Add()
     {
         return await CommonMethod(GIT_ADD_COMMAND);
     }
 
-    public async Task<string> Add(params string[] files)
+    public async Task<string> Add(string file)
     {
-        return await CommonMethod(string.Format(GIT_ADD_SEPARATE_COMMAND, string.Join(" ", files)));
+        return await CommonMethod(string.Format(GIT_ADD_SEPARATE_COMMAND, file));
     }
 
-    public Task<string> ChangeBranche(string branch)
+    public async Task<string> ChangeBranche(string branch)
     {
-        throw new NotImplementedException();
+        return await CommonMethod(GIT_CHECKOUT_COMMAND, branch);
     }
 
-    public Task<string> Clone(string source)
+    public async Task<string> Clone(string source)
     {
-        throw new NotImplementedException();
+        return await CommonMethod(GIT_CLONE_COMMAND, source);
     }
 
-    public Task<string> Commit(string message)
+    public async Task<string> Commit(string message)
     {
-        throw new NotImplementedException();
+        return await CommonMethod(GIT_COMMIT_COMMAND, message);
     }
 
     public async Task<string> GetBranches()
@@ -77,28 +102,30 @@ public class GitClient : IGitClient
         return await CommonMethod(GIT_BRANCH_COMMAND);
     }
 
-    public Task<string> GetCurrentBranch()
+    public async Task<string> GetCurrentBranch()
     {
-        throw new NotImplementedException();
+        return await CommonMethod(GIT_BRANCH_COMMAND, CURRENT);
     }
 
-    public Task<string> GetVersion()
+    public async Task<string> GetVersion()
     {
-        throw new NotImplementedException();
+        return await CommonMethod(GIT_VERSION_COMMAND);
     }
 
-    public Task<string> Init()
+    public async Task<string> Init()
     {
-        throw new NotImplementedException();
+        return await CommonMethod(GIT_INIT_COMMAND);
     }
 
-    public Task<string> Pull()
+    public async Task<string> Pull()
     {
-        throw new NotImplementedException();
+        return await CommonMethod(GIT_PULL_COMMAND);
     }
 
-    public Task<string> Push()
+    public async Task<string> Push()
     {
-        throw new NotImplementedException();
+        return await CommonMethod(GIT_PUSH_COMMAND);
     }
+
+    #endregion
 }
