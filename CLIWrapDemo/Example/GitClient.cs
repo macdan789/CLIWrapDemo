@@ -9,8 +9,9 @@ public class GitClient : IGitClient
     #region CONSTANTS
 
     private const string GIT_COMMAND = "git";
-    private const string GIT_COMMIT_COMMAND = "commit";
+    private const string GIT_COMMIT_COMMAND = "commit -m \"{0}\"";
     private const string GIT_ADD_COMMAND = "add *";
+    private const string GIT_RESTORE_COMMAND = "restore --staged *";
     private const string GIT_ADD_SEPARATE_COMMAND = "add {0}";
     private const string GIT_INIT_COMMAND = "init";
     private const string GIT_PULL_COMMAND = "pull";
@@ -32,9 +33,9 @@ public class GitClient : IGitClient
     private async Task<string> CommonMethod(params string[] args)
     {
         try
-        {
+        {            
             var result = await Cli.Wrap(GIT_COMMAND)
-                .WithArguments(args)
+                .WithArguments(string.Join(' ', args))
                 .WithWorkingDirectory(workingPath)
                 .WithValidation(CommandResultValidation.ZeroExitCode)
                 .ExecuteBufferedAsync();
@@ -82,6 +83,11 @@ public class GitClient : IGitClient
         return await CommonMethod(string.Format(GIT_ADD_SEPARATE_COMMAND, file));
     }
 
+    public async Task<string> Restore()
+    {
+        return await CommonMethod(GIT_RESTORE_COMMAND);
+    }
+
     public async Task<string> ChangeBranche(string branch)
     {
         return await CommonMethod(GIT_CHECKOUT_COMMAND, branch);
@@ -94,7 +100,7 @@ public class GitClient : IGitClient
 
     public async Task<string> Commit(string message)
     {
-        return await CommonMethod(GIT_COMMIT_COMMAND, message);
+        return await CommonMethod(string.Format(GIT_COMMIT_COMMAND, message ?? "default message"));
     }
 
     public async Task<string> GetBranches()
