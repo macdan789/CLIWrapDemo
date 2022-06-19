@@ -21,3 +21,11 @@ Console.WriteLine(commitResult);
 
 var pushResult = await client.Push();
 Console.WriteLine(pushResult);
+
+//--------Execute-Powershell-file---------
+
+var powershellResult = await Cli.Wrap("powershell")
+    .WithArguments(new[] { @"...\Example\Demo.ps1" })
+    .ExecuteBufferedAsync();
+
+Console.WriteLine(powershellResult.StandardOutput);
