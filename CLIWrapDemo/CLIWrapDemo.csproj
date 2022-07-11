@@ -10,4 +10,8 @@
     <PackageReference Include="CliWrap" Version="3.4.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Example\GitClient\" />
+  </ItemGroup>
+
 </Project>

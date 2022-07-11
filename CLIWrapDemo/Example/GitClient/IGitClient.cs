@@ -1,4 +1,4 @@
-﻿namespace CLIWrapDemo.Example;
+﻿namespace CLIWrapDemo.Example.GitClient;
 
 public interface IGitClient
 {

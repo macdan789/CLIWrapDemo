@@ -2,7 +2,7 @@
 using CliWrap.Buffered;
 using System.Text;
 
-namespace CLIWrapDemo.Example;
+namespace CLIWrapDemo.Example.GitClient;
 
 public enum GitCommand
 {
