@@ -2,30 +2,32 @@
 using CliWrap.Buffered;
 using CLIWrapDemo.Example;
 
-var dotnet = await Cli.Wrap("dotnet")
-    .WithArguments(new[] { "--version" })
-    .ExecuteBufferedAsync();
+//var dotnet = await Cli.Wrap("dotnet")
+//    .WithArguments(new[] { "--version" })
+//    .ExecuteBufferedAsync();
 
-Console.WriteLine(dotnet.StandardOutput);
+//Console.WriteLine(dotnet.StandardOutput);
 
-//----------Simple-GitClient--------------
+////----------Simple-GitClient--------------
 
-var path = @"your_working_directory";
-IGitClient client = new GitClient(path);
+//var path = @"your_working_directory";
+//IGitClient client = new GitClient(path);
 
-var addResult = await client.Add();
-Console.WriteLine(addResult);
+//var addResult = await client.Add();
+//Console.WriteLine(addResult);
 
-var commitResult = await client.Commit("commit via Git Client");
-Console.WriteLine(commitResult);
+//var commitResult = await client.Commit("commit via Git Client");
+//Console.WriteLine(commitResult);
 
-var pushResult = await client.Push();
-Console.WriteLine(pushResult);
+//var pushResult = await client.Push();
+//Console.WriteLine(pushResult);
 
-//--------Execute-Powershell-file---------
+////--------Execute-Powershell-file---------
 
-var powershellResult = await Cli.Wrap("powershell")
-    .WithArguments(new[] { @"...\Example\Demo.ps1" })
-    .ExecuteBufferedAsync();
+//var powershellResult = await Cli.Wrap("powershell")
+//    .WithArguments(new[] { @"...\Example\Demo.ps1" })
+//    .ExecuteBufferedAsync();
 
-Console.WriteLine(powershellResult.StandardOutput);
+//Console.WriteLine(powershellResult.StandardOutput);
+
+var gitClient = new GitClient();

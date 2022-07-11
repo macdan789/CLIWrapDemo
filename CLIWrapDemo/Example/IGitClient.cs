@@ -4,6 +4,7 @@ public interface IGitClient
 {
     Task<string> GetVersion();
     Task<string> Init();
+    Task<string> Status();
     Task<string> Add();
     Task<string> Commit(string message);
     Task<string> Pull();
@@ -12,5 +13,4 @@ public interface IGitClient
     Task<string> GetCurrentBranch();
     Task<string> GetBranches();
     Task<string> ChangeBranche(string branch);
-
 }
