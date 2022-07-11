@@ -7,5 +7,4 @@
 - powershell commands
 - git commands
 - dotnet commands
-- etc.<br/>
-**what helps us to automate different types of tasks.**
+- etc, what helps us to automate different types of tasks.
