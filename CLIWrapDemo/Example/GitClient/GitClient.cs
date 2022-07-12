@@ -6,83 +6,55 @@ namespace CLIWrapDemo.Example.GitClient;
 
 public enum GitCommand
 {
-    INIT = 1,
-    STATUS,
-    ADD,
-    COMMIT,
-    PUSH,
-    PULL,
-    VERSION,
-    CHECKOUT,
-    CLONE,
-    CURRENT,
-    BRANCHES,
-    END
+    init = 1,
+    status,
+    add,
+    commit,
+    push,
+    pull,
+    version,
+    checkout,
+    clone,
+    branch,
+    end
 }
 
 public class GitClient : IGitClient
 {
-    #region CONSTANTS
 
-    private const string GIT_COMMAND = "git";
-    private const string GIT_STATUS = "status";
-    private const string GIT_COMMIT_COMMAND = "commit -m \"{0}\"";
-    private const string GIT_ADD_COMMAND = "add *";
-    private const string GIT_INIT_COMMAND = "init";
-    private const string GIT_PULL_COMMAND = "pull";
-    private const string GIT_PUSH_COMMAND = "push";
-    private const string GIT_CLONE_COMMAND = "clone";
-    private const string GIT_BRANCH_COMMAND = "branch";
-    private const string CURRENT = "--show-current";
-    private const string GIT_CHECKOUT_COMMAND = "checkout";
-    private const string GIT_VERSION_COMMAND = "--version";
+    private const string GIT = "git";
+    private const string BRANCH_ALL = "-a";
+    private const string ADD_ALL = "*";
+    private const char SPACE = ' ';
+
     private readonly string workingPath;
-    private readonly string commands = $"[1] - init\t[2] - status\t[3] - add\t[4] - commit\t[5] - push\t[6] - pull" +
-        $"\n[7] - version\t[8] - checkout\t[9] - clone\t[10] - current\t[11] - branches\t[12] - end";
-   
-    #endregion
 
-    private bool _continue = true;
+    private readonly string commands = $"[1] - init\t[2] - status\t[3] - add\t[4] - commit\t[5] - push\t[6] - pull\n" +
+                                       $"[7] - version\t[8] - checkout\t[9] - clone\t[10] - branches\t[11] - end";
 
     public GitClient()
     {
         Console.Write("Enter working path: ");
         workingPath = Console.ReadLine();
 
-        while (_continue)
+        bool stop = false;
+
+        while (!stop)
         {
             try
             {
                 Console.WriteLine(commands);
                 Console.Write("Choose git operation: ");
-                var type = (GitCommand)Int32.Parse(Console.ReadLine());
-                
-                if(type == GitCommand.END)
+                var command = (GitCommand)Int32.Parse(Console.ReadLine());
+
+                if(command == GitCommand.end)
                 {
-                    _continue = false;
-                }
-                else if (type == GitCommand.COMMIT)
-                {
-                    Console.Write("Commit message: ");
-                    var message = Console.ReadLine();
-                    Console.WriteLine(GetOperation(type, message).Result);
-                }
-                else if(type == GitCommand.CLONE)
-                {
-                    Console.Write("Source to clone: ");
-                    var source = Console.ReadLine();
-                    Console.WriteLine(GetOperation(type, source).Result);
-                }
-                else if(type == GitCommand.CHECKOUT)
-                {
-                    Console.WriteLine(GetOperation(GitCommand.BRANCHES, string.Empty).Result);
-                    Console.Write("Enter branch name: ");
-                    var branch = Console.ReadLine();
-                    Console.WriteLine(GetOperation(type, branch).Result);
+                    stop = true;
                 }
                 else
                 {
-                    Console.WriteLine(GetOperation(type, string.Empty).Result);
+                    var output = Execute(command).Result;
+                    Console.WriteLine('\n' + output);
                 }
             }
             catch(Exception ex)
@@ -93,19 +65,18 @@ public class GitClient : IGitClient
     }
 
 
-    private async Task<string> GetOperation(GitCommand command, string obj) => command switch
+    private async Task<string> Execute(GitCommand command) => command switch
         {
-            GitCommand.INIT => await Init(),
-            GitCommand.ADD => await Add(),
-            GitCommand.COMMIT => await Commit(obj),
-            GitCommand.PUSH => await Push(),
-            GitCommand.PULL => await Pull(),
-            GitCommand.VERSION => await GetVersion(),
-            GitCommand.CLONE => await Clone(obj),
-            GitCommand.CHECKOUT => await ChangeBranche(obj),
-            GitCommand.CURRENT => await GetCurrentBranch(),
-            GitCommand.BRANCHES => await GetBranches(),
-            GitCommand.STATUS => await Status(),
+            GitCommand.init => await Init(),
+            GitCommand.add => await Add(),
+            GitCommand.commit => await Commit(),
+            GitCommand.push => await Push(),
+            GitCommand.pull => await Pull(),
+            GitCommand.version => await GetVersion(),
+            GitCommand.clone => await Clone(),
+            GitCommand.checkout => await ChangeBranche(),
+            GitCommand.branch => await GetBranches(),
+            GitCommand.status => await Status(),
             _ => "Wrong type of git operation!"
         };
 
@@ -114,8 +85,8 @@ public class GitClient : IGitClient
     {
         try
         {            
-            var result = await Cli.Wrap(GIT_COMMAND)
-                .WithArguments(string.Join(' ', args))
+            var result = await Cli.Wrap(GIT)
+                .WithArguments(string.Join(SPACE, args))
                 .WithWorkingDirectory(workingPath)
                 .WithValidation(CommandResultValidation.ZeroExitCode)
                 .ExecuteBufferedAsync();
@@ -124,29 +95,7 @@ public class GitClient : IGitClient
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
-            return string.Empty;
-        }
-    }
-
-    private async Task<string> CommonMethodNotBuffered(params string[] args)
-    {
-        try
-        {
-            var outputBuffer = new StringBuilder();
-
-            var result = await Cli.Wrap(GIT_COMMAND)
-                .WithArguments(args)
-                .WithWorkingDirectory(workingPath)
-                .WithValidation(CommandResultValidation.ZeroExitCode)
-                .WithStandardOutputPipe(PipeTarget.ToStringBuilder(outputBuffer))
-                .ExecuteAsync();
-
-            return outputBuffer.ToString();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
+            Console.WriteLine('\n' + ex.Message);
             return string.Empty;
         }
     }
@@ -154,60 +103,42 @@ public class GitClient : IGitClient
 
     #region MAIN_COMMANDS
 
-    public async Task<string> Add()
+    public async Task<string> ChangeBranche()
     {
-        return await CommonMethod(GIT_ADD_COMMAND);
+        var branches = Execute(GitCommand.branch).Result;
+        Console.WriteLine('\n' + branches);
+        Console.Write("\nEnter branch name: ");
+        var branch = Console.ReadLine();
+        return await CommonMethod(GitCommand.checkout.ToString(), branch);
     }
 
-    public async Task<string> ChangeBranche(string branch)
+    public async Task<string> Clone()
     {
-        return await CommonMethod(GIT_CHECKOUT_COMMAND, branch);
+        Console.Write("\nEnter source: ");
+        var source = Console.ReadLine();
+        return await CommonMethod(GitCommand.clone.ToString(), source);
     }
 
-    public async Task<string> Clone(string source)
+    public async Task<string> Commit()
     {
-        return await CommonMethod(GIT_CLONE_COMMAND, source);
+        Console.Write("\nEnter commit message: ");
+        var message = Console.ReadLine();
+        return await CommonMethod(string.Format(GitCommand.commit.ToString(), string.IsNullOrEmpty(message) ? "default message" : message));
     }
 
-    public async Task<string> Commit(string message)
-    {
-        return await CommonMethod(string.Format(GIT_COMMIT_COMMAND, message ?? "default message"));
-    }
+    public async Task<string> Add() => await CommonMethod(GitCommand.add.ToString(), ADD_ALL);
 
-    public async Task<string> GetBranches()
-    {
-        return await CommonMethod(GIT_BRANCH_COMMAND);
-    }
+    public async Task<string> GetBranches() => await CommonMethod(GitCommand.branch.ToString(), BRANCH_ALL);
 
-    public async Task<string> GetCurrentBranch()
-    {
-        return await CommonMethod(GIT_BRANCH_COMMAND, CURRENT);
-    }
+    public async Task<string> GetVersion() => await CommonMethod(GitCommand.version.ToString());
 
-    public async Task<string> GetVersion()
-    {
-        return await CommonMethod(GIT_VERSION_COMMAND);
-    }
+    public async Task<string> Init() => await CommonMethod(GitCommand.init.ToString());
 
-    public async Task<string> Init()
-    {
-        return await CommonMethod(GIT_INIT_COMMAND);
-    }
+    public async Task<string> Status() => await CommonMethod(GitCommand.status.ToString());
 
-    public async Task<string> Status()
-    {
-        return await CommonMethod(GIT_STATUS);
-    }
+    public async Task<string> Pull() => await CommonMethod(GitCommand.pull.ToString());
 
-    public async Task<string> Pull()
-    {
-        return await CommonMethod(GIT_PULL_COMMAND);
-    }
-
-    public async Task<string> Push()
-    {
-        return await CommonMethod(GIT_PUSH_COMMAND);
-    }
+    public async Task<string> Push() => await CommonMethod(GitCommand.push.ToString());
 
     #endregion
 }

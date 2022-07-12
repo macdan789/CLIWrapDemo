@@ -6,11 +6,10 @@ public interface IGitClient
     Task<string> Init();
     Task<string> Status();
     Task<string> Add();
-    Task<string> Commit(string message);
+    Task<string> Commit();
     Task<string> Pull();
     Task<string> Push();
-    Task<string> Clone(string source);
-    Task<string> GetCurrentBranch();
+    Task<string> Clone();
     Task<string> GetBranches();
-    Task<string> ChangeBranche(string branch);
+    Task<string> ChangeBranche();
 }
