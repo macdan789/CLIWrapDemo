@@ -1,6 +1,5 @@
 ﻿using CliWrap;
 using CliWrap.Buffered;
-using System.Text;
 
 namespace CLIWrapDemo.Example.GitClient;
 
